@@ -28,11 +28,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Fetch initial session
         const getInitialSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-
-            if (mounted) {
-                setUser(session?.user ?? null);
-                setLoading(false);
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) {
+                    console.error("Supabase auth error:", error.message);
+                }
+                if (mounted) {
+                    setUser(session?.user ?? null);
+                    setLoading(false);
+                }
+            } catch (err) {
+                console.error("Failed to fetch Supabase session:", err);
+                if (mounted) {
+                    setUser(null);
+                    setLoading(false);
+                }
             }
         };
 
